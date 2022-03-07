@@ -1,0 +1,178 @@
+云计算 一种模型  用户 通过互联网访问可共享的资源池 以最低的交互复杂度提供给用户服务。廉价的资源池 随时随地 按需自助 快速弹性（）
+做什么？提供服务 重视服务 云盘 
+
+部署方式： 公有云（均可访问） 私有云（自己公司使用） 混合云（华为 既有私又有公） 行业云（医疗 交通 运输） 社区云（各大高校形成的社区提供使用）
+商业模式：
+        IAAS：基础架构即服务   云主机 云盘
+        PAAS：平台即服务          提供二次开发的平台
+        SAAS：软件即服务          office365
+
+虚拟化与云计算 
+        虚拟化：技术手段 对资源的逻辑表达
+        虚拟化在云计算中是一种核心技术
+ 
+Windows7物理机------虚拟机Linux
+虚拟化层：VMM，Hypersior
+
+开源： KVM Xen
+XEN架构： Domain0---特权级别的虚拟机（I/O处理）
+                 DomainU---指客户的虚拟机
+
+VMware workstation
+sudo password root  为root放密码
+su root ----切换超户
+apt isntall net-tools
+安装Vmware-tools
+reboot
+
+远程ssh登陆
+apt install ssh 安装ssh
+cd/etc/sshd/sshd_config
+
+cd/etc/ssh/
+gedit sshd_config
+
+找到 #PermitRootLogin
+新起一行 PermintRootLogin yes
+保存退出
+
+重启服务 ：/etc/inint.d/ssh restart
+查看服务状态 :/etc /init.d/ssh status
+
+下载putty  或 xshell
+
+egrep -c '(svm|vmx)' /proc/cpuinfo
+数值大于零  表示支持
+egrep -e '(svm|vmx)' /proc/cpuinfo
+返回vmx表示支持
+sudo apt install qemu qemu-kvm libvir-bin bridge-utils virt-manager
+
+
+
+
+
+二    
+云计算特征：硬件基础设施架构在大规模廉价服务器集群之上
+                    应用与底层服务协作开发最大限度的利用资源
+                    通过多个廉价服务器冗余使得系统高可用性
+
+
+
+
+
+
+# 关闭防火墙
+systemctl stop firewalld
+systemctl disable firewalld
+sudo systemctl status firewalld。
+
+# 关闭selinux
+sed -i 's/enforcing/disabled/' /etc/selinux/config  # 永久
+setenforce 0  # 临时
+#getenforce
+enforcing为开启、disable为关闭：
+
+# 关闭swap
+swapoff -a  # 临时
+sed -ri 's/.*swap.*/#&/' /etc/fstab    # 永久
+free -m
+
+# 根据规划设置主机名
+hostnamectl set-hostname <hostname>
+
+# 根据规划设置主机名
+hostnamectl set-hostname <hostname>
+
+
+
+配置  https://www.runoob.com/w3cnote/vmware-install-centos7.html
+关闭 防火墙  https://jingyan.baidu.com/article/49ad8bce97bd965834d8fa8b.html
+编辑vi https://www.cnblogs.com/shaosks/p/9167767.html
+关闭 selinux   https://blog.csdn.net/zhoushengtao12/article/details/95346903
+关闭swap  https://blog.csdn.net/yefun/article/details/102772368?utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control
+xshell  连接！https://blog.csdn.net/qq_43585157/article/details/106992907
+
+杀死进程 https://www.cnblogs.com/kaerxifa/p/11534539.html
+配置源  https://www.fujieace.com/linux/yum-repos-d.html
+解决kube-flannel.yml        https://blog.csdn.net/chen_haoren/article/details/108580338?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control
+
+cat >> /etc/hosts << EOF
+10.102.17.101 master1
+10.102.14.48 node1 
+10.102.17.129 node2 
+EOF
+
+cat > /etc/sysctl.d/k8s.conf << EOF 
+net.bridge.bridge-nf-call-ip6tables = 1 
+net.bridge.bridge-nf-call-iptables = 1 
+EOF
+
+wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo
+yum -y install docker-ce-18.06.1.ce-3.el7
+systemctl enable docker && systemctl start docker
+docker --version
+
+cat > /etc/docker/daemon.json << EOF
+ { 
+     "registry-mirrors": ["https://b9pmyelo.mirror.aliyuncs.com"] 
+}
+EOF
+
+systemctl restart docker
+
+cat > /etc/yum.repos.d/kubernetes.repo << EOF
+[kubernetes] 
+name=Kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64 
+enabled=1 
+gpgcheck=0 
+repo_gpgcheck=0 
+gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg 
+EOF
+
+yum install -y kubelet-1.18.0 kubeadm-1.18.0 kubectl-1.18.0
+systemctl enable kubelet
+111.18.2.49
+kubeadm init  --apiserver-advertise-address=10.102.17.101  --image-repository registry.aliyuncs.com/google_containers  --kubernetes-version v1.17.0  --service-cidr=10.96.0.0/12  --pod-network-cidr=10.244.0.0/16
+
+kubeadm token create --print-join-command
+
+kubectl apply –f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube- flannel.yml
+
+kubectl create deployment nginx --image=nginx
+kubectl expose deployment nginx --port=80 --type=NodePort
+kubectl get pod,svc
+
+kubectl get pods -o wide 查看pod详细信息
+
+kubectl label node node1 env_role=dev    给节点加标签
+kubectl get nodes node1 --show-labels  查看标签
+
+kubectl describe node node1 | grep Taint  污点查看命令
+NoSchedule 一定不被调度
+PreferNoSchdule 尽量不被调度
+NoExecute  不被调度 并且把该节点的pod 驱逐出去
+kubectl taint node node1 key=value:污点类型（三个值）      为节点添加污点
+kubectl taint node node1 env_role:NoSchedule-     删除污点
+
+kubectl create deployment name --image=镜像  创建pod
+kubectl delete deployment name   删除pod
+
+kubectl create deployment web --image=nginx --dry-run -o yaml > web.yaml    尝试部署应用web 镜像为nginx  并将yaml 保存
+kubectl apply -f web.yaml   部署项目
+kubectl expose deployment web --port=80 --type=NodePort --target-port=80 --name=web1 -o yaml > web1.yaml   对外暴露端口的yaml
+kubectl get pods,svc  查看pod 和端口号
+kubectl delete service web 删除服务
+
+kubectl set image deployment web nginx=nginx:1.15  应用升级回滚（这里指定版本）
+kubectl rollout status deployment web  查看升级状态
+kubectl rollout history deployment web 查看历史版本
+kubectl rollout undo deployment web  回滚到上一个版本
+kubectl rollout undo deployment web --to-revision=2  回滚到指定版本（这里是2）
+
+kubectl scale deployment web --replicas=10 弹性伸缩 （创建指定副本到10个）
+
+mv 文件1名称  文件2名称   修改文件名称
+
+netstat -antp | grep [端口号]  用于查看监听端口
+
